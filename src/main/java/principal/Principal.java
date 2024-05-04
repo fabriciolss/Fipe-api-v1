@@ -1,5 +1,6 @@
 package principal;
 
+import exception.InputInvalidoException;
 import model.*;
 import service.*;
 
@@ -15,23 +16,31 @@ public class Principal {
 
     public void exibeMenu() throws IOException, InterruptedException {
         String opcaoUsuario = usuarioDados.getInputUsuarioTipoVeiculo();
+        String opcaoUsuarioPadronizado = opcaoUsuario.toLowerCase().replace("õ", "o");
 
-        List<Dados> dadosCarros = this.centralDeProcessos(opcaoUsuario);
+        if (opcaoUsuarioPadronizado.contains("carros")
+                | opcaoUsuarioPadronizado.contains("motos")
+                | opcaoUsuarioPadronizado.contains("caminhoes")
+        ) {
+            this.centralDeProcessos(opcaoUsuario);
+        }
 
-        dadosCarros.forEach(v -> {
-                    try {
-                        this.exibeVeiculos(v.codigo());
-                    } catch (IOException | InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
+        throw new InputInvalidoException(opcaoUsuarioPadronizado + " inválido. Tente novamente conforme instrução");
     }
 
-    private List<Dados> centralDeProcessos(String opcaoUsuario) throws IOException, InterruptedException {
+    private void centralDeProcessos(String opcaoUsuario) throws IOException, InterruptedException {
         this.exibeMarcas(opcaoUsuario);
         this.exibeModelos();
-        return this.exibeAnos();
+        List<Dados> dadosCarros = this.exibeAnos();
+
+        dadosCarros.forEach(v -> {
+            try {
+                this.exibeVeiculos(v.codigo());
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
     }
 
     private void exibeMarcas(String opcaoUsuario) throws IOException, InterruptedException {
